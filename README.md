@@ -2,6 +2,9 @@
 
 [简体中文](README.zh-CN.md)
 
+📺 **Video tutorial** (9 min, Chinese narration and subtitles):
+[watch on Bilibili](https://www.bilibili.com/video/BV1114q6nEbS/)
+
 An **experimental** fail-closed egress guard for Windows with
 [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev) (Mihomo core).
 
@@ -43,9 +46,11 @@ blocked, then restart the service and check the egress again.
 
 ## Two ways to install
 
-- **Do it yourself:** follow [Setup](#setup) below.
+- **Do it yourself:** follow [Setup](#setup) below
+  ([video from 02:24](https://www.bilibili.com/video/BV1114q6nEbS/?t=144)).
 - **Let an AI agent do it:** if an agent such as Claude Code or Codex can run commands on
-  this PC, it can do most of the work. It follows [AGENTS.md](AGENTS.md).
+  this PC, it can do most of the work. It follows [AGENTS.md](AGENTS.md)
+  ([video from 05:07](https://www.bilibili.com/video/BV1114q6nEbS/?t=307)).
 
 ### Let an AI agent set it up
 

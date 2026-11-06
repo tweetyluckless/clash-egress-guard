@@ -2,6 +2,8 @@
 
 [English](README.md)
 
+📺 **视频教程**（9 分钟，中文旁白和字幕）：[在 B 站观看](https://www.bilibili.com/video/BV1114q6nEbS/)
+
 一个**实验性**的 Windows 出口保护工具，配合
 [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev)（Mihomo 内核）使用，
 代理失效时自动断网，不会回落直连。
@@ -35,8 +37,8 @@
 
 ## 两种安装方式
 
-- **自己操作**：按下面的[安装](#安装)步骤来。
-- **交给 AI Agent**：如果你电脑上有能运行命令的 Agent（例如 Claude Code、Codex），大部分步骤可以交给它，它会按照 [AGENTS.md](AGENTS.md) 来操作。
+- **自己操作**：按下面的[安装](#安装)步骤来（[视频从 02:24 开始](https://www.bilibili.com/video/BV1114q6nEbS/?t=144)）。
+- **交给 AI Agent**：如果你电脑上有能运行命令的 Agent（例如 Claude Code、Codex），大部分步骤可以交给它，它会按照 [AGENTS.md](AGENTS.md) 来操作（[视频从 05:07 开始](https://www.bilibili.com/video/BV1114q6nEbS/?t=307)）。
 
 ### 交给 AI Agent
 
