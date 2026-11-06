@@ -8,6 +8,7 @@
   "scripts": {
     "prepare-config": "node guard.cjs prepare",
     "check": "node guard.cjs policy-check",
+    "inspect": "node inspect.cjs",
     "test": "node --test test.cjs",
     "test:powershell": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Test-PowerShell.ps1"
   },

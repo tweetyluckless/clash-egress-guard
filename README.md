@@ -41,6 +41,40 @@ blocked, then restart the service and check the egress again.
 - A working proxy node or group in Clash whose first hop is a fixed
   host reached over TCP.
 
+## Two ways to install
+
+- **Do it yourself:** follow [Setup](#setup) below.
+- **Let an AI agent do it:** if an agent such as Claude Code or Codex can run commands on
+  this PC, it can do most of the work. It follows [AGENTS.md](AGENTS.md).
+
+### Let an AI agent set it up
+
+First, do these yourself: install Clash Verge Rev, turn on service mode, and make sure your
+node works. Then paste this to your agent:
+
+```text
+Install clash-egress-guard on this PC by following AGENTS.md in
+https://github.com/tweetyluckless/clash-egress-guard. Tell me when an administrator
+prompt is needed and I will click it myself. Do not read or print my proxy passwords or
+subscription URLs.
+```
+
+The agent checks your setup, downloads the project and lists your nodes with
+`npm run inspect`, which never prints passwords. It then asks which node and egress country
+to use, writes `config.local.json` and runs the prepare step.
+
+There is one step only you can do. When the agent asks, double-click `install.cmd` and
+click **Yes** on the administrator prompt. Agents cannot click that prompt. The network
+drops for a moment during the install, so the agent may lose its connection briefly. Later
+mode switches also need you to click **Yes**. Afterwards, the agent can read the result
+files to check the switch.
+
+> [!CAUTION]
+> Don't let the agent open Clash's configuration files directly. They contain your
+> subscription URL and node passwords, and anything the agent reads is sent to its AI
+> provider. If the whole PC goes offline, the agent can't help either. Run `live.cmd` to
+> get direct access back, or `restore.cmd` to remove the guard.
+
 ## Setup
 
 ```bash
@@ -56,7 +90,10 @@ npm ci
 ```
 
 1. Copy `config.example.json` to `config.local.json` and edit it. This file is
-   git-ignored.
+   git-ignored. If you're not sure what to enter, two commands can help.
+   `npm run inspect` lists your proxies and groups. It prints names, servers and ports,
+   never passwords. `npm run inspect -- --outbound "<name>"` works out the `upstream` for
+   that outbound and warns about setups that can't work.
 
    | Field | Meaning |
    | --- | --- |
@@ -143,6 +180,8 @@ the real firewall or proxy settings.
 
 | File | Role |
 | --- | --- |
+| `AGENTS.md` | Step-by-step instructions and safety rules for AI agents. |
+| `inspect.cjs` | Lists outbounds without secrets and works out the first hop of one outbound. |
 | `guard.cjs` | Helper CLI: `prepare`, `policy-check`, `proxy-check`, `direct-check`, `blocked-check`, `configure-mode`. |
 | `policy.cjs` | Builds and checks the Clash policy. The same function is injected into Clash's script runtime. |
 | `settings.cjs`, `Settings.ps1` | Load and validate `config.local.json`. |

@@ -33,6 +33,30 @@
 - `PATH` 中有 Node.js 20 或更高版本。
 - Clash 里有一个可用的代理节点或分组，第一跳是通过 TCP 连接的固定主机。
 
+## 两种安装方式
+
+- **自己操作**：按下面的[安装](#安装)步骤来。
+- **交给 AI Agent**：如果你电脑上有能运行命令的 Agent（例如 Claude Code、Codex），大部分步骤可以交给它，它会按照 [AGENTS.md](AGENTS.md) 来操作。
+
+### 交给 AI Agent
+
+先自己完成这几件事：安装 Clash Verge Rev、开启服务模式、确认节点能用。然后把下面这段话发给你的 Agent：
+
+```text
+请按照 https://github.com/tweetyluckless/clash-egress-guard 里的 AGENTS.md，帮我在这台电脑上安装 clash-egress-guard。
+需要管理员确认的步骤告诉我，我自己来点。不要读取或输出我的节点密码和订阅链接。
+```
+
+Agent 会检查你的电脑环境、下载项目，并用 `npm run inspect` 列出你的节点（不会显示密码），
+然后问你用哪个节点、出口应该在哪个国家，再写好 `config.local.json`，运行准备步骤。
+
+有一步只能你自己做：Agent 请你双击 `install.cmd` 时，在管理员提示里点“是”。Agent 点不了这个弹窗。
+安装中途会短暂断网，Agent 可能暂时掉线。以后切换模式也要你自己点“是”，切完可以让 Agent 读取结果文件帮你确认。
+
+> [!CAUTION]
+> 不要让 Agent 直接打开 Clash 的配置文件，里面有订阅链接和节点密码，Agent 读到的内容都会发送给它的 AI 服务商。
+> 万一整机断网，Agent 也连不上，这时请自己运行 `live.cmd` 恢复直连，或运行 `restore.cmd` 卸载保护。
+
 ## 安装
 
 ```bash
@@ -48,6 +72,8 @@ npm ci
 ```
 
 1. 把 `config.example.json` 复制为 `config.local.json` 并修改。该文件不会提交到 git。
+   不知道怎么填，可以用两个命令帮忙：`npm run inspect` 列出你的节点和分组，只显示名称、服务器和端口，不会显示密码；
+   `npm run inspect -- --outbound "<名称>"` 会算出这个出站的 `upstream`，配置不可行时也会提示。
 
    | 字段 | 含义 |
    | --- | --- |
