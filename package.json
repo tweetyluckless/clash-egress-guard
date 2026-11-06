@@ -1,0 +1,15 @@
+{
+  "name": "clash-egress-guard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Experimental Windows egress guard and live-streaming mode switch for an existing Clash Verge Rev proxy.",
+  "license": "MIT",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "prepare-config": "node guard.cjs prepare",
+    "check": "node guard.cjs policy-check",
+    "test": "node --test test.cjs",
+    "test:powershell": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Test-PowerShell.ps1"
+  },
+  "dependencies": { "yaml": "2.9.1" }
+}

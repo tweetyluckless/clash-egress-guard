@@ -1,0 +1,17 @@
+node_modules/
+config.local.json
+*.local.json
+.env
+.env.*
+state/
+runtime/
+backups/
+*.wfw
+*.lnk
+status.json
+mode-status.json
+manifest.json
+*.log
+*.bak
+coverage/
+*.zip

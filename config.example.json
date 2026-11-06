@@ -1,0 +1,14 @@
+{
+  "clashDataDir": "",
+  "clashExe": "C:/Program Files/Clash Verge/clash-verge.exe",
+  "coreExe": "C:/Program Files/Clash Verge/verge-mihomo.exe",
+  "serviceName": "clash_verge_service",
+  "outbound": "REPLACE_WITH_EXISTING_PROXY_OR_GROUP",
+  "expectedCountry": "JP",
+  "expectedIp": "",
+  "tunDevice": "EgressGuard",
+  "upstream": { "host": "REPLACE_WITH_FIRST_HOP_HOST", "port": 443 },
+  "bootstrapDns": ["1.1.1.1", "9.9.9.9"],
+  "appsToCloseBeforeLive": [],
+  "stateDir": ""
+}
