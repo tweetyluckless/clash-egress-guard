@@ -73,5 +73,35 @@ $script:taskRegistry=[ordered]@{ProxyEnable=0;AutoConfigURL='http://example.inva
 Restore-ModeProxy
 if($script:taskRegistry['ProxyEnable'] -ne 1 -or $script:taskRegistry['ProxyServer'] -ne '127.0.0.1:7890' -or $script:taskRegistry['ProxyOverride'] -ne '<local>' -or $script:taskRegistry.Contains('AutoConfigURL')){throw 'System proxy settings were not restored from the snapshot.'}
 
+# Launcher. A copy runs next to a stand-in Settings.ps1 and Modes.ps1. The stand-in starts a
+# long-lived child, like Protect mode starting the Clash GUI, so the launcher must return while
+# that child is still running. Start-Process is mocked to drop -Verb RunAs: nothing is elevated.
+$taskLauncherDir=Join-Path $taskModeState 'launcher'
+$taskLauncherState=Join-Path $taskLauncherDir 'state'
+New-Item -ItemType Directory -Path $taskLauncherState -Force | Out-Null
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Launch.ps1') -Destination $taskLauncherDir
+"[pscustomobject]@{state='$taskLauncherState'}" | Set-Content -LiteralPath (Join-Path $taskLauncherDir 'Settings.ps1')
+@'
+param([string]$Mode)
+$taskChild=Start-Process powershell.exe -WindowStyle Hidden -ArgumentList '-NoProfile -Command Start-Sleep 60' -PassThru
+$taskChild.Id | Add-Content -LiteralPath (Join-Path $PSScriptRoot 'child.pid')
+if(Test-Path -LiteralPath (Join-Path $PSScriptRoot 'silent')){exit 3}
+@{phase='complete'; details=@{effectiveMode=$Mode}} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $PSScriptRoot 'state\mode-status.json')
+'@ | Set-Content -LiteralPath (Join-Path $taskLauncherDir 'Modes.ps1')
+function Start-Process {
+    [CmdletBinding()]param($FilePath,$Verb,$WindowStyle,$ArgumentList,[switch]$PassThru,[switch]$Wait)
+    if($Wait){throw 'The launcher must not use -Wait; it also waits for the Clash GUI.'}
+    Microsoft.PowerShell.Management\Start-Process -FilePath $FilePath -WindowStyle $WindowStyle -ArgumentList $ArgumentList -PassThru:$PassThru
+}
+$taskLauncher=Join-Path $taskLauncherDir 'Launch.ps1'
+$taskTimer=[Diagnostics.Stopwatch]::StartNew()
+$taskOutput=& $taskLauncher -Mode Protect 6>&1 | Out-String
+if($taskTimer.Elapsed.TotalSeconds -gt 30){throw 'The launcher waited for the child process.'}
+if($taskOutput -notmatch '"complete"'){throw ('The launcher did not print the final status: ' + $taskOutput)}
+New-Item -ItemType File -Path (Join-Path $taskLauncherDir 'silent') | Out-Null
+$taskOutput=& $taskLauncher -Mode Protect 6>&1 | Out-String
+if($LASTEXITCODE -ne 1 -or $taskOutput -notmatch 'without writing a new status report'){throw ('The launcher accepted an old status report: ' + $taskOutput)}
+Get-Content -LiteralPath (Join-Path $taskLauncherDir 'child.pid') | ForEach-Object {Stop-Process -Id ([int]$_) -ErrorAction SilentlyContinue}
+
 Remove-Item -LiteralPath $taskModeState -Recurse -Force
-@{ruleStateTransitions='passed'; userChangesPreserved=$true; proxySnapshotRoundTrip='passed'; actualFirewallTouched=$false; actualRegistryTouched=$false} | ConvertTo-Json -Compress
+@{ruleStateTransitions='passed'; userChangesPreserved=$true; proxySnapshotRoundTrip='passed'; launcherReturnsWhileChildRuns='passed'; actualFirewallTouched=$false; actualRegistryTouched=$false} | ConvertTo-Json -Compress
