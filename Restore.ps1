@@ -3,7 +3,7 @@ $taskIdentity = [Security.Principal.WindowsIdentity]::GetCurrent()
 if (-not ([Security.Principal.WindowsPrincipal]::new($taskIdentity)).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'Run Restore.cmd and accept the administrator prompt.' }
 $taskSettings = & (Join-Path $PSScriptRoot 'Settings.ps1')
 $taskState = $taskSettings.state
-$taskManifest = Get-Content -LiteralPath (Join-Path $taskState 'manifest.json') -Raw | ConvertFrom-Json
+$taskManifest = Get-Content -LiteralPath (Join-Path $taskState 'manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
 $taskFirewallBackup = Join-Path $taskState 'firewall-before.wfw'
 $taskBackupIndex = Join-Path $taskState 'last-firewall-backup.json'
 if (Test-Path -LiteralPath $taskBackupIndex) {

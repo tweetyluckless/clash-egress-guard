@@ -29,4 +29,10 @@ function validate(raw,env=process.env){
   return c;
 }
 function load(){if(!fs.existsSync(CONFIG))throw new Error('Copy config.example.json to config.local.json and edit it before use.');return validate(JSON.parse(fs.readFileSync(CONFIG,'utf8').replace(/^\uFEFF/,'')));}
-module.exports={load,validate,CONFIG};
+// Windows PowerShell 5.1 decodes Node's output with the console code page (GBK on Chinese
+// Windows) and can break JSON with non-ASCII names, so JSON for PowerShell is ASCII only.
+function jsonForPowerShell(value,space){return JSON.stringify(value,null,space).replace(/[\u007f-\uFFFF]/g,c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0'));}
+// Same form as WindowsIdentity.Name, which Install.ps1 and Modes.ps1 compare it with. whoami.exe
+// prints in the console code page, and in Git Bash `whoami` is a different program.
+function currentUser(env=process.env){if(!env.USERDOMAIN)throw new Error('USERDOMAIN is not set; run this from a normal Windows session.');return env.USERDOMAIN+'\\'+os.userInfo().username;}
+module.exports={load,validate,CONFIG,jsonForPowerShell,currentUser};

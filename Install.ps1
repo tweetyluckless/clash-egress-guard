@@ -3,7 +3,7 @@ Set-StrictMode -Version Latest
 $taskSettings = & (Join-Path $PSScriptRoot 'Settings.ps1')
 $taskState = $taskSettings.state
 $taskReport = Join-Path $taskState 'status.json'
-$taskManifest = Get-Content -LiteralPath (Join-Path $taskState 'manifest.json') -Raw | ConvertFrom-Json
+$taskManifest = Get-Content -LiteralPath (Join-Path $taskState 'manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
 $taskIdentity = [Security.Principal.WindowsIdentity]::GetCurrent()
 if (-not ([Security.Principal.WindowsPrincipal]::new($taskIdentity)).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     throw 'Administrator privileges are required. No settings were changed.'

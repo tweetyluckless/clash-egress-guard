@@ -1,6 +1,6 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),path=require('node:path'),os=require('node:os');
-const P=require('./policy.cjs'),{validate}=require('./settings.cjs');
+const P=require('./policy.cjs'),{validate,jsonForPowerShell,currentUser}=require('./settings.cjs');
 const raw={clashExe:'C:/Example/Clash/clash-verge.exe',coreExe:'C:/Example/Clash/verge-mihomo.exe',outbound:'Fixed-Egress',expectedCountry:'JP',expectedIp:'',tunDevice:'EgressGuard',serviceName:'clash_verge_service',upstream:{host:'proxy.example.org',port:443},bootstrapDns:['1.1.1.1'],appsToCloseBeforeLive:['ExampleApp'],stateDir:path.join(os.tmpdir(),'egress-test-state')};
 const settings=validate(raw);
 const fixture=()=>({proxies:[{name:'Fixed-Egress',type:'socks5',server:'192.0.2.10',port:1080,password:'FAKE_PASSWORD_FOR_TEST'}],'proxy-groups':[],rules:['MATCH,DIRECT'],custom:'preserve'});
@@ -14,6 +14,8 @@ test('mode input and unsafe rule names are rejected',()=>{assert.throws(()=>P.mo
 test('expected country, IP and upstream endpoint are checked',()=>{assert.throws(()=>validate({...raw,expectedCountry:''}));assert.throws(()=>validate({...raw,expectedIp:'invalid'}));assert.throws(()=>validate({...raw,upstream:{host:'proxy.example.org',port:0}}));assert.throws(()=>validate({...raw,bootstrapDns:['https://example.org/dns-query']}));});
 test('apps to close before Live mode are optional plain process names',()=>{const {appsToCloseBeforeLive,...rest}=raw;assert.deepEqual(validate(rest).appsToCloseBeforeLive,[]);assert.throws(()=>validate({...raw,appsToCloseBeforeLive:['app.exe']}),/without \.exe/);assert.throws(()=>validate({...raw,appsToCloseBeforeLive:['a b']}));});
 test('runtime state cannot be placed inside the source tree',()=>{assert.throws(()=>validate({...raw,stateDir:__dirname}),/outside/);assert.throws(()=>validate({...raw,stateDir:path.join(__dirname,'private')}),/outside/);});
+test('JSON for PowerShell is ASCII only and keeps Chinese and emoji names',()=>{const v={outbound:'🇯🇵 东京 "01" 日',state:'C:\\Users\\张三\\state'};const s=jsonForPowerShell(v,2);assert.match(s,/^[\x00-\x7e]*$/);assert.deepEqual(JSON.parse(s),v);assert.ok(validate({...raw,outbound:v.outbound}));});
+test('the preparing user is recorded as DOMAIN\\user without running whoami',()=>{assert.equal(currentUser({USERDOMAIN:'PC-NAME'}),'PC-NAME\\'+os.userInfo().username);assert.throws(()=>currentUser({}),/USERDOMAIN/);});
 test('changing the expected rule sequence invalidates policy',()=>{const c=P.enforcePolicy(fixture(),settings);c.rules.unshift('MATCH,DIRECT');assert.throws(()=>P.checkPolicy(c,settings));});
 const I=require('./inspect.cjs');
 const inspectFixture=()=>({'mixed-port':7890,proxies:[

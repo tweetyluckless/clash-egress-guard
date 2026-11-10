@@ -73,6 +73,8 @@ cd clash-egress-guard
 npm ci
 ```
 
+在 PowerShell 里如果提示“禁止运行脚本”，把 `npm` 换成 `npm.cmd`（例如 `npm.cmd ci`），或者改用命令提示符（cmd）运行。
+
 1. 把 `config.example.json` 复制为 `config.local.json` 并修改。该文件不会提交到 git。
    不知道怎么填，可以用两个命令帮忙：`npm run inspect` 列出你的节点和分组，只显示名称、服务器和端口，不会显示密码；
    `npm run inspect -- --outbound "<名称>"` 会算出这个出站的 `upstream`，配置不可行时也会提示。

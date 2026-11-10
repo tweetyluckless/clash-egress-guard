@@ -2,6 +2,7 @@
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),https=require('node:https'),tls=require('node:tls'),net=require('node:net'),dns=require('node:dns').promises,crypto=require('node:crypto');
 const {execFileSync}=require('node:child_process');
 const P=require('./policy.cjs');
+const {jsonForPowerShell,currentUser}=require('./settings.cjs');
 const S=require('./settings.cjs').load();
 const ROOT=S.root,STATE=S.state,EXPECTED=S.expectedIp||'',COUNTRY=S.expectedCountry;
 const FILES=['profiles/Script.js','config.yaml','verge.yaml','clash-verge.yaml'];
@@ -96,8 +97,8 @@ async function prepare(){
     hashes[file]=crypto.createHash('sha256').update(fs.readFileSync(path.join(ROOT,file))).digest('hex');
     fs.writeFileSync(path.join(STATE,'staged',file),contents[file],'utf8');
   }
-  const manifest={root:ROOT,state:STATE,files:FILES,hashes,preparedBy:execFileSync('whoami',[],{encoding:'utf8',windowsHide:true}).trim(),preparedAt:new Date().toISOString(),expectedIp:EXPECTED,expectedCountry:COUNTRY,device:S.device,upstreamHost:S.upstream.host,upstreamPort:S.upstream.port,upstreamAddresses:addresses,core:S.core,app:S.app,coreSha256:crypto.createHash('sha256').update(fs.readFileSync(S.core)).digest('hex').toUpperCase(),trustedServiceCoreRoot:S.trustedServiceCoreRoot,version};
-  fs.writeFileSync(path.join(STATE,'manifest.json'),JSON.stringify(manifest,null,2));
+  const manifest={root:ROOT,state:STATE,files:FILES,hashes,preparedBy:currentUser(),preparedAt:new Date().toISOString(),expectedIp:EXPECTED,expectedCountry:COUNTRY,device:S.device,upstreamHost:S.upstream.host,upstreamPort:S.upstream.port,upstreamAddresses:addresses,core:S.core,app:S.app,coreSha256:crypto.createHash('sha256').update(fs.readFileSync(S.core)).digest('hex').toUpperCase(),trustedServiceCoreRoot:S.trustedServiceCoreRoot,version};
+  fs.writeFileSync(path.join(STATE,'manifest.json'),jsonForPowerShell(manifest,2));
   return {prepared:true,state:STATE,files:FILES.length};
 }
 async function run(){
@@ -114,4 +115,4 @@ async function run(){
     default:throw new Error('Unknown command.');
   }
 }
-run().then(r=>console.log(JSON.stringify(r))).catch(e=>{console.error(e.message);process.exitCode=1;});
+run().then(r=>console.log(process.stdout.isTTY?JSON.stringify(r):jsonForPowerShell(r))).catch(e=>{console.error(e.message);process.exitCode=1;});

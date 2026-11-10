@@ -1,7 +1,7 @@
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
 $taskSettings=& (Join-Path $PSScriptRoot 'Settings.ps1')
-$taskManifest=Get-Content -LiteralPath (Join-Path $taskSettings.state 'manifest.json') -Raw | ConvertFrom-Json
+$taskManifest=Get-Content -LiteralPath (Join-Path $taskSettings.state 'manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
 $taskIdentity=[Security.Principal.WindowsIdentity]::GetCurrent()
 if(-not ([Security.Principal.WindowsPrincipal]::new($taskIdentity)).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)-or $taskManifest.preparedBy -ne $taskIdentity.Name){throw 'Elevate as the user who prepared this installation.'}
 $taskChanged=$false

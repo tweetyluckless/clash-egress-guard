@@ -6,7 +6,7 @@ if (-not ([Security.Principal.WindowsPrincipal]::new($taskIdentity)).IsInRole([S
 $taskSettings = & (Join-Path $PSScriptRoot 'Settings.ps1')
 $taskInstallState = $taskSettings.state
 $taskModeState = $taskSettings.modeState
-$taskManifest = Get-Content -LiteralPath (Join-Path $taskInstallState 'manifest.json') -Raw | ConvertFrom-Json
+$taskManifest = Get-Content -LiteralPath (Join-Path $taskInstallState 'manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
 $taskRoot = $taskManifest.root
 if ($taskManifest.preparedBy -ne $taskIdentity.Name) { throw 'Elevate as the same user who prepared this installation.' }
 $taskHelper = Join-Path $PSScriptRoot 'guard.cjs'

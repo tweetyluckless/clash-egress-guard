@@ -94,6 +94,9 @@ cd clash-egress-guard
 npm ci
 ```
 
+If PowerShell says running scripts is disabled on this system, type `npm.cmd` instead of
+`npm` (for example `npm.cmd ci`), or use Command Prompt.
+
 1. Copy `config.example.json` to `config.local.json` and edit it. This file is
    git-ignored. If you're not sure what to enter, two commands can help.
    `npm run inspect` lists your proxies and groups. It prints names, servers and ports,

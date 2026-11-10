@@ -73,6 +73,14 @@ $script:taskRegistry=[ordered]@{ProxyEnable=0;AutoConfigURL='http://example.inva
 Restore-ModeProxy
 if($script:taskRegistry['ProxyEnable'] -ne 1 -or $script:taskRegistry['ProxyServer'] -ne '127.0.0.1:7890' -or $script:taskRegistry['ProxyOverride'] -ne '<local>' -or $script:taskRegistry.Contains('AutoConfigURL')){throw 'System proxy settings were not restored from the snapshot.'}
 
+# Non-ASCII outbound names. PowerShell decodes Node's output with the console code page (GBK on
+# Chinese Windows). The JSON must survive that decoding and still give back the original name.
+$taskName=[string][char]0x65E5 + ' ' + [char]::ConvertFromUtf32(0x1F1EF) + [char]::ConvertFromUtf32(0x1F1F5) + ' 01'
+$taskNode=(Get-Command node.exe -ErrorAction Stop).Source
+$taskNodeJson=& $taskNode -e "process.stdout.write(require(process.argv[1]).jsonForPowerShell({outbound:process.argv[2]}))" (Join-Path $PSScriptRoot 'settings.cjs') $taskName
+$taskAsGbk=[Text.Encoding]::GetEncoding(936).GetString([Text.Encoding]::UTF8.GetBytes(($taskNodeJson -join "`n")))
+if(($taskAsGbk | ConvertFrom-Json).outbound -ne $taskName){throw 'A non-ASCII outbound name did not survive the GBK console code page.'}
+
 # Launcher. A copy runs next to a stand-in Settings.ps1 and Modes.ps1. The stand-in starts a
 # long-lived child, like Protect mode starting the Clash GUI, so the launcher must return while
 # that child is still running. Start-Process is mocked to drop -Verb RunAs: nothing is elevated.
@@ -104,4 +112,4 @@ if($LASTEXITCODE -ne 1 -or $taskOutput -notmatch 'without writing a new status r
 Get-Content -LiteralPath (Join-Path $taskLauncherDir 'child.pid') | ForEach-Object {Stop-Process -Id ([int]$_) -ErrorAction SilentlyContinue}
 
 Remove-Item -LiteralPath $taskModeState -Recurse -Force
-@{ruleStateTransitions='passed'; userChangesPreserved=$true; proxySnapshotRoundTrip='passed'; launcherReturnsWhileChildRuns='passed'; actualFirewallTouched=$false; actualRegistryTouched=$false} | ConvertTo-Json -Compress
+@{ruleStateTransitions='passed'; userChangesPreserved=$true; proxySnapshotRoundTrip='passed'; nonAsciiNames='passed'; launcherReturnsWhileChildRuns='passed'; actualFirewallTouched=$false; actualRegistryTouched=$false} | ConvertTo-Json -Compress
